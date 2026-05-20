@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Runspot — Find your run</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Syne:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#0b0f0c;
+  --bg2:#111610;
+  --bg3:#181f16;
+  --card:#141a12;
+  --border:rgba(255,255,255,0.07);
+  --border2:rgba(255,255,255,0.13);
+  --text:#edf0e8;
+  --muted:#6b7566;
+  --muted2:#4a5247;
+  --accent:#7bdb6e;
+  --accent-dim:rgba(123,219,110,0.1);
+  --accent-text:#0b0f0c;
+  --red:#e85c3a;
+  --orange:#e8a03a;
+  --blue:#3ab0e8;
+  --purple:#9b6ee8;
+  --radius:10px;
+  --radius-lg:18px;
+  --mono:'DM Mono',monospace;
+  --display:'Syne',sans-serif;
+}
+
+html{scroll-behavior:smooth}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--mono);
+  font-size:14px;
+  line-height:1.6;
+  min-height:100vh;
+}
+
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;opacity:.7;
+}
+*{position:relative;z-index:1}
+
+/* ── HEADER ── */
+header{
+  position:sticky;top:0;z-index:200;
+  background:rgba(11,15,12,0.9);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  padding:0 2.5rem;height:58px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+
+.logo{
+  display:flex;align-items:center;gap:9px;
+  font-family:var(--display);font-weight:800;font-size:17px;
+  letter-spacing:-0.03em;color:var(--text);text-decoration:none;
+}
+
+.logo-mark{
+  width:26px;height:26px;
+  background:var(--accent);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+}
+.logo-mark svg{width:13px;height:13px;fill:var(--accent-text)}
+
+nav{display:flex;gap:2px}
+nav a{
+  font-size:12px;color:var(--muted);text-decoration:none;
+  padding:6px 12px;border-radius:7px;
+  transition:color .15s,background .15s;
+}
+nav a:hover{color:var(--text);background:var(--bg3)}
+
+.header-right{display:flex;align-items:center;gap:12px}
+
+.live-pill{
+  display:flex;align-items:center;gap:6px;
+  font-size:11px;font-family:var(--mono);
+  color:var(--accent);background:var(--accent-dim);
+  border:1px solid rgba(123,219,110,0.18);
+  padding:4px 10px;border-radius:20px;letter-spacing:.04em;
+}
+.live-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--accent);
+  animation:blink 1.6s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── HERO ── */
+.hero{
+  padding:5rem 2.5rem 4rem;
+  max-width:960px;margin:0 auto;
+  display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;
+}
+
+@media(max-width:700px){
+  .hero{grid-template-columns:1fr;gap:2rem;padding:2.5rem 1.2rem 2rem}
+  nav{display:none}
+  header{padding:0 1.2rem}
+  section,.add-section{padding-left:1.2rem;padding-right:1.2rem}
+}
+
+.hero-eyebrow{
+  font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:1.1rem;
+}
+
+h1{
+  font-family:var(--display);font-weight:800;
+  font-size:clamp(2.6rem,5.8vw,4.2rem);
+  line-height:.96;letter-spacing:-.04em;
+  color:var(--text);margin-bottom:1.2rem;
+}
+h1 span{color:var(--accent)}
+
+.hero-sub{
+  font-size:14px;color:var(--muted);line-height:1.75;
+  max-width:380px;margin-bottom:2.2rem;
+}
+
+.hero-stats{display:flex;gap:2.2rem}
+.hstat-n{
+  font-family:var(--display);font-weight:700;font-size:2rem;
+  letter-spacing:-.04em;color:var(--text);
+}
+.hstat-l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+
+/* hero right card */
+.hero-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:1.2rem;
+}
+.hero-card-label{
+  font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--muted);margin-bottom:.85rem;
+}
+
+.mini-run{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 11px;border-radius:9px;
+  background:var(--bg3);border:1px solid var(--border);
+  margin-bottom:6px;
+}
+.mini-run:last-child{margin-bottom:0}
+.mini-now{
+  width:8px;height:8px;border-radius:50%;background:var(--accent);
+  flex-shrink:0;animation:blink 1.5s ease-in-out infinite;
+}
+.mini-soon{width:8px;height:8px;border-radius:50%;background:var(--muted2);flex-shrink:0}
+.mini-info{flex:1}
+.mini-name{font-size:12px;font-weight:500;color:var(--text)}
+.mini-meta{font-size:11px;color:var(--muted)}
+.mini-km{font-family:var(--display);font-weight:700;font-size:13px;color:var(--text)}
+
+/* ── SECTION ── */
+section{max-width:960px;margin:0 auto;padding:0 2.5rem 4rem}
+
+.sec-head{
+  display:flex;align-items:baseline;justify-content:space-between;
+  padding-bottom:.85rem;border-bottom:1px solid var(--border);
+  margin-bottom:1.4rem;
+}
+.sec-title{font-family:var(--display);font-weight:700;font-size:1.1rem;letter-spacing:-.02em}
+.sec-meta{font-size:12px;color:var(--muted)}
+
+/* ── TAB BAR ── */
+.tab-bar{
+  display:flex;gap:2px;
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--radius);padding:3px;
+  width:fit-content;margin-bottom:1.6rem;
+}
+.tab-btn{
+  font-family:var(--mono);font-size:12px;
+  background:none;border:none;color:var(--muted);
+  padding:7px 16px;border-radius:7px;cursor:pointer;
+  transition:all .15s;letter-spacing:.02em;
+}
+.tab-btn.active{color:var(--accent-text);background:var(--accent);font-weight:500}
+
+/* ── FILTER BAR ── */
+.filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.6rem}
+.filter-btn{
+  font-family:var(--mono);font-size:12px;
+  background:var(--bg2);border:1px solid var(--border);
+  color:var(--muted);padding:5px 14px;border-radius:20px;
+  cursor:pointer;transition:all .15s;
+}
+.filter-btn:hover{border-color:var(--border2);color:var(--text)}
+.filter-btn.active{background:var(--accent-dim);border-color:rgba(123,219,110,0.3);color:var(--accent)}
+
+/* ── DAY BLOCK ── */
+.day-block{margin-bottom:2.5rem}
+.day-label{
+  display:flex;align-items:center;gap:10px;
+  font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--muted);margin-bottom:.85rem;
+}
+.day-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── RUN CARD ── */
+.run-card{
+  display:grid;grid-template-columns:3px 1fr auto;
+  gap:0 15px;align-items:center;
+  padding:13px 16px;
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--radius);margin-bottom:8px;
+  transition:border-color .15s,background .15s;
+  animation:fadeUp .35s ease both;
+}
+.run-card:hover{border-color:var(--border2);background:var(--bg3)}
+.run-card.now{border-color:rgba(123,219,110,.25);background:rgba(123,219,110,.03)}
+.run-card.now .stripe{background:var(--accent)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.run-card:nth-child(1){animation-delay:.04s}
+.run-card:nth-child(2){animation-delay:.08s}
+.run-card:nth-child(3){animation-delay:.12s}
+.run-card:nth-child(4){animation-delay:.16s}
+.run-card:nth-child(5){animation-delay:.20s}
+
+.stripe{align-self:stretch;border-radius:3px;min-height:42px}
+
+.card-body{display:flex;flex-direction:column;gap:5px}
+.card-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card-name{font-family:var(--display);font-weight:600;font-size:15px;color:var(--text)}
+
+.tag{
+  font-size:10px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;
+  padding:2px 8px;border-radius:4px;font-family:var(--mono);
+}
+.tag-now{background:var(--accent-dim);color:var(--accent);border:1px solid rgba(123,219,110,.2)}
+.tag-easy{background:rgba(58,176,232,.08);color:var(--blue);border:1px solid rgba(58,176,232,.15)}
+.tag-tempo{background:rgba(232,160,58,.08);color:var(--orange);border:1px solid rgba(232,160,58,.15)}
+.tag-trail{background:rgba(123,219,110,.07);color:#5ab84e;border:1px solid rgba(123,219,110,.15)}
+.tag-interval{background:rgba(232,92,58,.08);color:var(--red);border:1px solid rgba(232,92,58,.15)}
+.tag-social{background:rgba(155,110,232,.08);color:var(--purple);border:1px solid rgba(155,110,232,.15)}
+.tag-night{background:rgba(100,100,200,.1);color:#9090ee;border:1px solid rgba(100,100,200,.15)}
+.tag-city{font-size:10px;color:var(--muted2);background:var(--bg3);border:1px solid var(--border);padding:2px 8px;border-radius:4px;font-family:var(--mono)}
+
+.card-meta{display:flex;gap:14px;flex-wrap:wrap}
+.meta-i{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)}
+
+.card-right{text-align:right}
+.card-km{font-family:var(--display);font-weight:700;font-size:1.4rem;letter-spacing:-.03em;color:var(--text)}
+.card-km-u{font-size:10px;color:var(--muted2)}
+
+/* ── MAP ── */
+.map-wrap{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--radius-lg);overflow:hidden;height:460px;
+  position:relative;
+}
+.map-wrap svg{width:100%;height:100%}
+
+.map-tooltip{
+  position:absolute;
+  background:var(--bg3);border:1px solid var(--border2);
+  border-radius:9px;padding:10px 14px;
+  pointer-events:none;display:none;
+  min-width:180px;z-index:10;
+}
+.mtt-name{font-family:var(--display);font-weight:600;font-size:13px;color:var(--text);margin-bottom:4px}
+.mtt-meta{font-size:11px;color:var(--muted);line-height:1.6}
+.mtt-now{font-size:10px;color:var(--accent);font-weight:500;margin-top:4px}
+
+.map-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:1rem}
+.leg-i{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted)}
+.leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+
+/* ── CLUBS ── */
+.clubs-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(270px,1fr));
+  gap:12px;
+}
+.club-city-label{
+  grid-column:1/-1;
+  display:flex;align-items:center;gap:10px;
+  font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--muted);margin-top:1rem;margin-bottom:.5rem;
+}
+.club-city-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.club-city-label:first-child{margin-top:0}
+
+.club-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:18px;
+  transition:border-color .15s;animation:fadeUp .35s ease both;
+}
+.club-card:hover{border-color:var(--border2)}
+.club-head{display:flex;align-items:center;gap:11px;margin-bottom:11px}
+.club-av{
+  width:40px;height:40px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-weight:700;font-size:12px;
+  flex-shrink:0;letter-spacing:.02em;
+}
+.club-name{font-family:var(--display);font-weight:600;font-size:14px;color:var(--text);margin-bottom:2px}
+.club-days{font-size:12px;color:var(--muted)}
+.club-desc{font-size:13px;color:var(--muted);line-height:1.6;border-top:1px solid var(--border);padding-top:10px}
+
+/* ── ABOUT ── */
+.about-wrap{max-width:620px}
+
+.about-opener{
+  font-family:var(--display);font-weight:800;
+  font-size:clamp(1.5rem,3.5vw,2.2rem);
+  line-height:1.1;letter-spacing:-.03em;
+  color:var(--text);margin-bottom:1.8rem;
+}
+.about-opener span{color:var(--accent)}
+
+.about-body{
+  font-size:14px;color:var(--muted);line-height:1.85;
+  margin-bottom:1.4rem;
+}
+.about-body strong{color:var(--text);font-weight:500}
+
+.about-quote{
+  border-left:3px solid var(--accent);
+  padding:.9rem 1.4rem;
+  background:var(--accent-dim);
+  border-radius:0 var(--radius) var(--radius) 0;
+  margin:2rem 0;
+}
+.about-quote p{
+  font-family:var(--display);font-weight:600;
+  font-size:1rem;letter-spacing:-.01em;
+  color:var(--text);line-height:1.55;
+}
+
+.about-cards{
+  display:flex;gap:10px;flex-wrap:wrap;
+  margin:2rem 0;
+}
+.acard{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:16px 22px;
+  min-width:120px;
+}
+.acard-num{
+  font-family:var(--display);font-weight:800;
+  font-size:1.8rem;letter-spacing:-.04em;
+  color:var(--accent);
+}
+.acard-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:2px}
+
+/* ── ADD FORM ── */
+.add-section{max-width:960px;margin:0 auto;padding:0 2.5rem 6rem}
+
+.form-wrap{display:grid;grid-template-columns:1fr 1.5fr;gap:3rem;align-items:start}
+@media(max-width:700px){.form-wrap{grid-template-columns:1fr}}
+
+.form-left h2{
+  font-family:var(--display);font-weight:800;
+  font-size:1.7rem;letter-spacing:-.03em;
+  margin-bottom:.7rem;line-height:1.1;
+}
+.form-left p{font-size:13px;color:var(--muted);line-height:1.75;margin-bottom:1.5rem}
+
+.form-perks{display:flex;flex-direction:column;gap:9px}
+.perk{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--muted)}
+.perk-dot{
+  width:20px;height:20px;border-radius:5px;
+  background:var(--accent-dim);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-top:1px;font-size:11px;color:var(--accent);font-weight:600;
+}
+
+.form-card{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:1.8rem;
+}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.fg-full{grid-column:1/-1}
+
+label{
+  display:block;font-size:11px;font-weight:500;
+  text-transform:uppercase;letter-spacing:.08em;
+  color:var(--muted);margin-bottom:5px;
+}
+
+input,textarea,select{
+  font-family:var(--mono);font-size:13px;
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:8px;padding:9px 12px;color:var(--text);
+  outline:none;width:100%;
+  transition:border-color .15s;
+}
+input:focus,textarea:focus,select:focus{border-color:rgba(123,219,110,.4)}
+input::placeholder,textarea::placeholder{color:var(--muted2)}
+select option{background:var(--bg3)}
+textarea{resize:vertical;min-height:76px}
+
+.submit-btn{
+  width:100%;
+  font-family:var(--display);font-weight:700;font-size:15px;
+  background:var(--accent);color:var(--accent-text);
+  border:none;padding:13px;border-radius:10px;
+  cursor:pointer;letter-spacing:-.01em;
+  transition:opacity .15s,transform .12s;margin-top:4px;
+}
+.submit-btn:hover{opacity:.85;transform:translateY(-1px)}
+.submit-btn:active{transform:none}
+
+.success-msg{
+  display:none;
+  background:var(--accent-dim);border:1px solid rgba(123,219,110,.2);
+  border-radius:9px;padding:13px 15px;
+  font-size:13px;color:var(--accent);margin-top:12px;line-height:1.5;
+}
+
+/* ── FOOTER ── */
+footer{
+  border-top:1px solid var(--border);
+  max-width:960px;margin:0 auto;
+  padding:1.5rem 2.5rem;
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;
+}
+.foot-l{font-size:12px;color:var(--muted)}
+.foot-l strong{font-family:var(--display);font-weight:700;letter-spacing:-.02em;color:var(--text)}
+.foot-r{font-size:12px;color:var(--muted2)}
+
+/* ── LANG SWITCHER ── */
+.lang-switch{
+  display:flex;gap:2px;
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:8px;padding:2px;
+}
+.lang-btn{
+  font-family:var(--mono);font-size:11px;font-weight:500;
+  background:none;border:none;color:var(--muted);
+  padding:4px 9px;border-radius:6px;cursor:pointer;
+  transition:all .15s;letter-spacing:.04em;
+}
+.lang-btn.active{background:var(--accent);color:var(--accent-text)}
+
+/* ── REVEAL ── */
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s ease}
+.reveal.visible{opacity:1;transform:none}
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="#">
+    <div class="logo-mark">
+      <svg viewBox="0 0 16 16"><path d="M8 1C5 1 3 3.5 3 6c0 4 5 9 5 9s5-5 5-9c0-2.5-2-5-5-5zm0 6.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3z"/></svg>
+    </div>
+    Runspot
+  </a>
+  <nav>
+    <a href="#schedule" data-i18n="nav_schedule">Program</a>
+    <a href="#about" data-i18n="nav_about">O nás</a>
+    <a href="#clubs-tab" data-i18n="nav_clubs">Kluby</a>
+    <a href="#add" data-i18n="nav_add">Přidat klub</a>
+  </nav>
+  <div class="header-right">
+    <div class="lang-switch">
+      <button class="lang-btn active" onclick="setLang('cs')">CS</button>
+      <button class="lang-btn" onclick="setLang('en')">EN</button>
+    </div>
+    <div class="live-pill"><span class="live-dot"></span><span data-i18n="live">Živě</span></div>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero reveal">
+  <div class="hero-left">
+    <div class="hero-eyebrow" data-i18n="hero_eyebrow">// Komunita běžců v České republice</div>
+    <h1 data-i18n="hero_h1">Kde dneska<br><span>poběžíš?</span></h1>
+    <p class="hero-sub" data-i18n="hero_sub">Running cluby po celé České republice — kde se scházejí, kdy vybíhají a jak se přidat.</p>
+    <div class="hero-stats">
+      <div class="hstat">
+        <div class="hstat-n">24</div>
+        <div class="hstat-l" data-i18n="stat_clubs">Aktivních klubů</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-n">8</div>
+        <div class="hstat-l" data-i18n="stat_cities">Měst</div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-n" id="stat-today">5</div>
+        <div class="hstat-l" data-i18n="stat_today">Výběhů dnes</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-card">
+    <div class="hero-card-label" data-i18n="running_now">Právě běží</div>
+    <div class="mini-run">
+      <span class="mini-now"></span>
+      <div class="mini-info">
+        <div class="mini-name">Prague Running Crew</div>
+        <div class="mini-meta">Letenské sady · 18:00–19:30</div>
+      </div>
+      <div class="mini-km">8 km</div>
+    </div>
+    <div class="mini-run">
+      <span class="mini-now"></span>
+      <div class="mini-info">
+        <div class="mini-name">Brno Pacers</div>
+        <div class="mini-meta">Lužánky · 18:30–19:45</div>
+      </div>
+      <div class="mini-km">7 km</div>
+    </div>
+    <div class="mini-run">
+      <span class="mini-soon"></span>
+      <div class="mini-info">
+        <div class="mini-name">Ostrava Night Runners</div>
+        <div class="mini-meta" data-i18n-tpl="starts_at" data-i18n-val="20:00">Začíná v 20:00</div>
+      </div>
+      <div class="mini-km">6 km</div>
+    </div>
+    <div class="mini-run">
+      <span class="mini-soon"></span>
+      <div class="mini-info">
+        <div class="mini-name">Plzeň Runners Club</div>
+        <div class="mini-meta" data-i18n-tpl="starts_at" data-i18n-val="20:30">Začíná v 20:30</div>
+      </div>
+      <div class="mini-km">9 km</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<section id="schedule">
+  <div class="sec-head reveal">
+    <span class="sec-title" data-i18n="this_week">Tento týden</span>
+    <span class="sec-meta" id="today-label"></span>
+  </div>
+
+  <div class="tab-bar reveal">
+    <button class="tab-btn active" onclick="showTab('schedule')" data-i18n="tab_schedule">Program</button>
+    <button class="tab-btn" onclick="showTab('map')" data-i18n="tab_map">Mapa</button>
+    <button class="tab-btn" onclick="showTab('clubs')" id="clubs-tab" data-i18n="tab_clubs">Kluby</button>
+  </div>
+
+  <div class="filter-bar reveal" id="filter-bar"></div>
+
+  <div id="tab-schedule">
+    <div id="runs-output"></div>
+  </div>
+
+  <div id="tab-map" style="display:none">
+    <div class="map-wrap" id="map-container">
+      <div class="map-tooltip" id="map-tooltip">
+        <div class="mtt-name" id="mtt-name"></div>
+        <div class="mtt-meta" id="mtt-meta"></div>
+        <div class="mtt-now" id="mtt-now"></div>
+      </div>
+      <svg id="map-svg" viewBox="0 0 800 460" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="map-legend" id="map-legend"></div>
+    <p style="font-size:12px;color:var(--muted);margin-top:.7rem" data-i18n="map_hint">Najeď na pin pro detail klubu. Pulzující = právě běží.</p>
+  </div>
+
+  <div id="tab-clubs" style="display:none">
+    <div class="clubs-grid" id="clubs-grid"></div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<div class="add-section" id="about">
+  <div class="sec-head reveal">
+    <span class="sec-title" data-i18n="about_title">O projektu</span>
+  </div>
+  <div class="about-wrap">
+
+    <h2 class="about-opener reveal" data-i18n="about_h2">Running clubů je víc než dost.<br><span>Teď jsou konečně na jednom místě.</span></h2>
+
+    <p class="about-body reveal" data-i18n="about_p1">V posledních letech running komunita v Česku explodovala. V každém větším městě funguje několik klubů — někdo běhá v úterý ráno před prací, jiný v pátek večer s pivem na konci. Skvělé, ale roztříštěné. Nikde nebylo jasně vidět, <strong>kdo dnes vybíhá a odkud.</strong></p>
+
+    <div class="about-quote reveal">
+      <p data-i18n="about_quote">Nebojte se vyběhnout s klubem, kde jste ještě nebyli. Většina skupin vítá nové tváře — tempo se přizpůsobí, pivo po doběhu platí pro všechny stejně.</p>
+    </div>
+
+    <p class="about-body reveal" data-i18n="about_p2">Runspot vznikl z jednoduché myšlenky — jeden přehled, všechny kluby. <strong>Přidání je zdarma a může se přidat kdokoliv.</strong> Nezáleží jestli máš ve skupině deset nebo dvě stě lidí, jestli běžíš pětku nebo maraton, jestli jsi v Praze nebo v Olomouci.</p>
+
+    <div class="about-cards reveal">
+      <div class="acard">
+        <div class="acard-num">24</div>
+        <div class="acard-label" data-i18n="stat_clubs">Aktivních klubů</div>
+      </div>
+      <div class="acard">
+        <div class="acard-num">8</div>
+        <div class="acard-label" data-i18n="stat_cities">Měst</div>
+      </div>
+      <div class="acard">
+        <div class="acard-num">0 Kč</div>
+        <div class="acard-label" data-i18n="about_free">Zdarma navždy</div>
+      </div>
+    </div>
+
+    <p class="about-body reveal" data-i18n="about_p3">Runspot není firma ani startup — je to komunitní projekt bez reklam. Pokud máš nápad jak ho vylepšit nebo chceš pomoct s provozem, ozvi se na <a href="mailto:vencaprochazkaa@email.cz" style="color:var(--accent);text-decoration:none">vencaprochazkaa@email.cz</a>.</p>
+
+  </div>
+</div>
+
+<!-- ADD CLUB -->
+<div class="add-section" id="add">
+  <div class="sec-head reveal">
+    <span class="sec-title" data-i18n="add_title">Přidat klub</span>
+    <span class="sec-meta" data-i18n="add_meta">Zdarma · online do 24h</span>
+  </div>
+  <div class="form-wrap reveal">
+    <div class="form-left">
+      <h2 data-i18n="add_h2">Tvůj klub<br>tu chybí.</h2>
+      <p data-i18n="add_p">Ať běžíš v parku nebo v lese — ať tě najdou běžci ve tvém okolí.</p>
+      <div class="form-perks">
+        <div class="perk"><div class="perk-dot">✓</div><span data-i18n="perk1">Zobrazení v programu a na mapě</span></div>
+        <div class="perk"><div class="perk-dot">✓</div><span data-i18n="perk2">Běžci tě najdou podle města a stylu</span></div>
+        <div class="perk"><div class="perk-dot">✓</div><span data-i18n="perk3">Aktualizace kdykoliv — zdarma navždy</span></div>
+        <div class="perk"><div class="perk-dot">✓</div><span data-i18n="perk4">Odkaz na Instagram / web přímo v profilu</span></div>
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="form-grid">
+        <div><label data-i18n="f_name">Název klubu</label><input id="f-name" type="text" placeholder="Žižkov Runners"></div>
+        <div><label data-i18n="f_city">Město</label><input id="f-city" type="text" placeholder="Praha"></div>
+        <div><label data-i18n="f_place">Místo srazu</label><input id="f-place" type="text" placeholder="Riegrovy sady, vstup Blanická"></div>
+        <div><label data-i18n="f_time">Čas výběhu</label><input id="f-time" type="text" placeholder="Út + Čt 18:30"></div>
+        <div><label data-i18n="f_km">Vzdálenost</label><input id="f-km" type="text" placeholder="8 km"></div>
+        <div>
+          <label data-i18n="f_style">Styl běhu</label>
+          <select id="f-style">
+            <option value="" data-i18n="f_style_pick">— vyber —</option>
+            <option data-i18n="f_style_social">Sociální / přátelské tempo</option>
+            <option data-i18n="f_style_tempo">Tempo / interval</option>
+            <option data-i18n="f_style_trail">Trail / dlouhé výběhy</option>
+            <option data-i18n="f_style_mixed">Smíšené</option>
+          </select>
+        </div>
+        <div class="fg-full"><label data-i18n="f_contact">Instagram nebo web</label><input id="f-contact" type="text" placeholder="@vas_klub nebo vasklub.cz"></div>
+        <div class="fg-full"><label data-i18n="f_desc">Krátký popis</label><textarea id="f-desc" placeholder="Pár vět o vašem klubu — kdo jste, koho vítáte…"></textarea></div>
+      </div>
+      <button class="submit-btn" onclick="submitClub()" data-i18n="f_submit">Odeslat žádost →</button>
+      <div class="success-msg" id="success-msg" data-i18n="f_success">✓ Žádost přijata! Klub schválíme a zveřejníme do 24 hodin. Vítej na Runspotu.</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-l"><strong>Runspot</strong> — <span data-i18n="footer_tagline">Najdi svůj výběh po celé České republice.</span></div>
+  <div class="foot-r"><span data-i18n="footer_community">Komunitní projekt</span> · <a href="mailto:vencaprochazkaa@email.cz" style="color:var(--accent);text-decoration:none">vencaprochazkaa@email.cz</a></div>
+</footer>
+
+<script>
+// ─── I18N ────────────────────────────────────────────────────────────────────
+let lang = 'cs';
+
+const T = {
+  cs: {
+    nav_schedule:'Program', nav_clubs:'Kluby', nav_about:'O nás', nav_add:'Přidat klub',
+    live:'Živě',
+    hero_eyebrow:'// Komunita běžců v České republice',
+    hero_h1:'Kde dneska<br><span>poběžíš?</span>',
+    hero_sub:'Running cluby po celé České republice — kde se scházejí, kdy vybíhají a jak se přidat.',
+    stat_clubs:'Aktivních klubů', stat_cities:'Měst', stat_today:'Výběhů dnes',
+    running_now:'Právě běží',
+    starts_at:'Začíná v {v}',
+    this_week:'Tento týden',
+    tab_schedule:'Program', tab_map:'Mapa', tab_clubs:'Kluby',
+    map_hint:'Najeď na pin pro detail klubu. Pulzující = právě běží.',
+    running_now_tag:'Právě běží',
+    no_runs:'Žádné výběhy.',
+    add_title:'Přidat klub', add_meta:'Zdarma · online do 24h',
+    add_h2:'Tvůj klub<br>tu chybí.',
+    add_p:'Ať běžíš v parku nebo v lese — ať tě najdou běžci ve tvém okolí.',
+    perk1:'Zobrazení v programu a na mapě',
+    perk2:'Běžci tě najdou podle města a stylu',
+    perk3:'Aktualizace kdykoliv — zdarma navždy',
+    perk4:'Odkaz na Instagram / web přímo v profilu',
+    f_name:'Název klubu', f_city:'Město', f_place:'Místo srazu',
+    f_time:'Čas výběhu', f_km:'Vzdálenost', f_style:'Styl běhu',
+    f_style_pick:'— vyber —',
+    f_style_social:'Sociální / přátelské tempo',
+    f_style_tempo:'Tempo / interval',
+    f_style_trail:'Trail / dlouhé výběhy',
+    f_style_mixed:'Smíšené',
+    f_contact:'Instagram nebo web', f_desc:'Krátký popis',
+    f_submit:'Odeslat žádost →',
+    f_success:'✓ Žádost přijata! Klub schválíme a zveřejníme do 24 hodin. Vítej na Runspotu.',
+    f_alert:'Vyplň prosím název klubu, město a místo srazu.',
+    footer_tagline:'Kde dneska poběžíš? Najdi svůj klub.',
+    footer_community:'Komunitní projekt',
+    about_title:'O projektu',
+    about_h2:'Running clubů je víc než dost.<br><span>Teď jsou konečně na jednom místě.</span>',
+    about_p1:'V posledních letech running komunita v Česku explodovala. V každém větším městě funguje několik klubů — někdo běhá v úterý ráno před prací, jiný v pátek večer s pivem na konci. Skvělé, ale roztříštěné. Nikde nebylo jasně vidět, <strong>kdo dnes vybíhá a odkud.</strong>',
+    about_quote:'Nebojte se vyběhnout s klubem, kde jste ještě nebyli. Většina skupin vítá nové tváře — tempo se přizpůsobí, pivo po doběhu platí pro všechny stejně.',
+    about_p2:'Runspot vznikl z jednoduché myšlenky — jeden přehled, všechny kluby. <strong>Přidání je zdarma a může se přidat kdokoliv.</strong> Nezáleží jestli máš ve skupině deset nebo dvě stě lidí, jestli běžíš pětku nebo maraton, jestli jsi v Praze nebo v Olomouci.',
+    about_p3:'Runspot není firma ani startup — je to komunitní projekt bez reklam. Pokud máš nápad jak ho vylepšit nebo chceš pomoct s provozem, ozvi se na <a href="mailto:vencaprochazkaa@email.cz" style="color:var(--accent);text-decoration:none">vencaprochazkaa@email.cz</a>.',
+    about_free:'Zdarma navždy',
+    map_now_tag:'● Právě běží',
+    filter_all:'Vše',
+    days_cs: { Today:'Dnes', Thursday:'Čtvrtek', Friday:'Pátek', Saturday:'Sobota', Sunday:'Neděle', Monday:'Pondělí', Tuesday:'Úterý', Wednesday:'Středa' },
+    date_days:['Neděle','Pondělí','Úterý','Středa','Čtvrtek','Pátek','Sobota'],
+    date_months:['led','úno','bře','dub','kvě','čvn','čvc','srp','zář','říj','lis','pro'],
+  },
+  en: {
+    nav_schedule:'Schedule', nav_clubs:'Clubs', nav_about:'About', nav_add:'Add club',
+    live:'Live',
+    hero_eyebrow:'// Czech Republic Running Community',
+    hero_h1:'Find<br>your<br><span>run.</span>',
+    hero_sub:'Running clubs across the Czech Republic — where they meet, when they run, and how to join.',
+    stat_clubs:'Active clubs', stat_cities:'Cities', stat_today:'Runs today',
+    running_now:'Running right now',
+    starts_at:'Starts at {v}',
+    this_week:'This week',
+    tab_schedule:'Schedule', tab_map:'Map', tab_clubs:'Clubs',
+    map_hint:'Hover over a pin to see club details. Pulsing = running right now.',
+    running_now_tag:'Running now',
+    no_runs:'No runs found.',
+    add_title:'List your club', add_meta:'Free · live within 24h',
+    add_h2:'Your club<br>belongs here.',
+    add_p:'Whether you run in a city park or forest trails — get found by runners in your area.',
+    perk1:'Listed on the schedule and map',
+    perk2:'Runners discover you by city and style',
+    perk3:'Update your runs anytime — free forever',
+    perk4:'Instagram / website linked directly',
+    f_name:'Club name', f_city:'City', f_place:'Meeting spot',
+    f_time:'Typical time', f_km:'Distance', f_style:'Run style',
+    f_style_pick:'— select —',
+    f_style_social:'Social / easy pace',
+    f_style_tempo:'Tempo / speed work',
+    f_style_trail:'Trail / long runs',
+    f_style_mixed:'Mixed',
+    f_contact:'Instagram or website', f_desc:'Short description',
+    f_submit:'Submit your club →',
+    f_success:'✓ Request received! We\'ll review and publish your club within 24 hours. Welcome to Runspot.',
+    f_alert:'Please fill in club name, city and meeting spot.',
+    footer_tagline:'Find your run across the Czech Republic.',
+    footer_community:'Community project',
+    about_title:'About',
+    about_h2:'There are plenty of running clubs.<br><span>Now they\'re finally in one place.</span>',
+    about_p1:'In recent years the running community in the Czech Republic has exploded. Every major city has several clubs — some run Tuesday mornings before work, others Friday evenings with a beer at the end. Great, but scattered. <strong>There was nowhere to clearly see who\'s running today and from where.</strong>',
+    about_quote:'Don\'t be afraid to run with a club you\'ve never joined before. Most groups welcome new faces — the pace adjusts, and the post-run beer is for everyone.',
+    about_p2:'Runspot was built on a simple idea — one overview, all clubs. <strong>Adding your club is free and open to everyone.</strong> It doesn\'t matter if you have ten or two hundred members, whether you run a 5k or a marathon, whether you\'re in Prague or Olomouc.',
+    about_p3:'Runspot is not a company or a startup — it\'s a community project with no ads. If you have ideas for improvement or want to help run it, get in touch at <a href="mailto:vencaprochazkaa@email.cz" style="color:var(--accent);text-decoration:none">vencaprochazkaa@email.cz</a>.',
+    about_free:'Free forever',
+    map_now_tag:'● Running right now',
+    filter_all:'All',
+    days_cs: { Today:'Today', Thursday:'Thursday', Friday:'Friday', Saturday:'Saturday', Sunday:'Sunday', Monday:'Monday', Tuesday:'Tuesday', Wednesday:'Wednesday' },
+    date_days:['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
+    date_months:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+  }
+};
+
+function t(key) { return T[lang][key] || T['en'][key] || key; }
+
+function setLang(l) {
+  lang = l;
+  document.documentElement.lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.textContent === l.toUpperCase()));
+  // Update all data-i18n elements
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const val = t(key);
+    if (val.includes('<')) el.innerHTML = val; else el.textContent = val;
+  });
+  // Update data-i18n-tpl (template strings with {v})
+  document.querySelectorAll('[data-i18n-tpl]').forEach(el => {
+    const key = el.getAttribute('data-i18n-tpl');
+    const val = el.getAttribute('data-i18n-val') || '';
+    el.textContent = t(key).replace('{v}', val);
+  });
+  // Reset city filter to "all" equivalent for new lang
+  activeCity = t('filter_all');
+  // Re-render dynamic content
+  renderFilters();
+  renderSchedule();
+  renderClubs();
+  renderLegend();
+  setDate();
+  // Re-render map if visible
+  if (document.getElementById('tab-map').style.display !== 'none') renderMap();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// RUNSPOT — TAHÁK PRO AKTUALIZACE
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// JAK PŘIDAT NOVÝ KLUB
+// ─────────────────────
+// 1. Do pole CLUBS níže přidej nový řádek (před poslední závorku ]);
+//
+//    { id:'abc', name:'Název klubu', city:'Brno', abbr:'NKL',
+//      color:'#e85c3a', bg:'rgba(232,92,58,0.12)',
+//      days:'Út + Pá', desc:'Krátký popis klubu.' },
+//
+//    id      → unikátní zkratka, malá písmena bez mezer (např. 'mrc')
+//    name    → plný název klubu
+//    city    → město (musí sedět s city v RUNS)
+//    abbr    → 2–3 písmena pro avatar (např. 'MRC')
+//    color   → barva klubu (viz paleta níže)
+//    bg      → stejná barva ale průhledná — zkopíruj vzor a změň čísla
+//    days    → kdy typicky běží (zobrazí se v přehledu klubů)
+//    desc    → 1–2 věty o klubu
+//
+//
+// JAK PŘIDAT VÝBĚH (KONKRÉTNÍ AKCI)
+// ────────────────────────────────────
+// 2. Do pole RUNS níže přidej nový řádek:
+//
+//    { club:'Název klubu', city:'Brno', day:'Thursday', date:'Thu 22 May',
+//      time:'18:00', end:'19:30', place:'Místo srazu',
+//      km:8, tags:['social','easy'], color:'#e85c3a', now:false },
+//
+//    club    → musí přesně odpovídat name v CLUBS
+//    city    → město
+//    day     → Today / Monday / Tuesday / Wednesday / Thursday / Friday / Saturday / Sunday
+//    date    → libovolný text který se zobrazí (např. 'Thu 22 May')
+//    time    → čas začátku ('18:00')
+//    end     → čas konce ('19:30')
+//    place   → místo srazu
+//    km      → délka trasy v km (číslo)
+//    tags    → libovolná kombinace z: 'social' 'easy' 'tempo' 'interval' 'trail' 'night'
+//    color   → stejná barva jako u klubu v CLUBS
+//    now     → true = právě probíhá (pulzující pin na mapě), false = normální
+//
+//
+// PALETA BAREV — zkopíruj pár color + bg
+// ────────────────────────────────────────
+//    Zelená:   color:'#7bdb6e'  bg:'rgba(123,219,110,0.12)'
+//    Červená:  color:'#e85c3a'  bg:'rgba(232,92,58,0.12)'
+//    Modrá:    color:'#3ab0e8'  bg:'rgba(58,176,232,0.12)'
+//    Fialová:  color:'#9b6ee8'  bg:'rgba(155,110,232,0.12)'
+//    Oranžová: color:'#e8a03a'  bg:'rgba(232,160,58,0.12)'
+//    Růžová:   color:'#e86ea0'  bg:'rgba(232,110,160,0.12)'
+//
+//
+// JAK PŘIDAT NOVÉ MĚSTO NA MAPU
+// ──────────────────────────────
+// Najdi objekt CITY_COORDS níže a přidej souřadnice:
+//    'Liberec': { x: 310, y: 80 },
+// Mapa má rozměr 800×460. Praha je cca x:195 y:175, Brno x:420 y:290.
+//
+//
+// JAK NASADIT NA NETLIFY
+// ───────────────────────
+// 1. Jdi na app.netlify.com/drop
+// 2. Přetáhni soubor runspot.html do okna
+// 3. Hotovo — nová verze je živá během 10 sekund
+//
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ─── DATA — edituj CLUBS a RUNS pro aktualizaci obsahu ──────────────────────
+
+const CLUBS = [
+  { id:'prc', name:'Prague Running Crew',   city:'Praha',   abbr:'PRC', color:'#7bdb6e', bg:'rgba(123,219,110,0.12)', days:'Tue + Sat', desc:'All levels welcome. Pace adapts to the group. Always ends with coffee or beer.' },
+  { id:'rnr', name:'Riegrák Night Runners', city:'Praha',   abbr:'RNR', color:'#9b6ee8', bg:'rgba(155,110,232,0.12)', days:'Wed + Fri evenings', desc:'Night runs through Prague 2 and Vinohrady. Post-run beer mandatory.' },
+  { id:'ssc', name:'Smíchov Speed Club',    city:'Praha',   abbr:'SSC', color:'#e8a03a', bg:'rgba(232,160,58,0.12)',  days:'Thu morning + Sun', desc:'Interval and tempo training. Come if you want to get faster.' },
+  { id:'vtg', name:'Vltava Trail Gang',     city:'Praha',   abbr:'VTG', color:'#3ab0e8', bg:'rgba(58,176,232,0.12)',  days:'Thu + Sat', desc:'Trail and long runs along the Vltava river and beyond Prague.' },
+  { id:'bpa', name:'Brno Pacers',           city:'Brno',    abbr:'BPA', color:'#7bdb6e', bg:'rgba(123,219,110,0.12)', days:'Mon + Thu + Sat', desc:'The biggest running community in Brno. All styles, all levels.' },
+  { id:'btr', name:'Brno Trail Runners',    city:'Brno',    abbr:'BTR', color:'#3ab0e8', bg:'rgba(58,176,232,0.12)',  days:'Wed + Sun', desc:'Hill repeats, forest trails, Hády hill. For those who hate flat.' },
+  { id:'onr', name:'Ostrava Night Runners', city:'Ostrava', abbr:'ONR', color:'#9b6ee8', bg:'rgba(155,110,232,0.12)', days:'Tue + Fri nights', desc:'Ostrava after dark. Headlamps on, city lights as the backdrop.' },
+  { id:'plr', name:'Plzeň Runners Club',    city:'Plzeň',   abbr:'PLR', color:'#e85c3a', bg:'rgba(232,92,58,0.12)',   days:'Wed + Sat', desc:'Lochotín, Bolevecký rybník and the hills around Plzeň.' },
+];
+
+const RUNS = [
+  { club:'Prague Running Crew',   city:'Praha',   day:'Today',    date:'Wed 21 May', time:'18:00', end:'19:30', place:'Letenské sady, fontána',        km:8,  tags:['social','easy'],     color:'#7bdb6e', now:true  },
+  { club:'Riegrák Night Runners', city:'Praha',   day:'Today',    date:'Wed 21 May', time:'20:00', end:'21:15', place:'Riegrovy sady, vstup Blanická',  km:6,  tags:['social','night'],    color:'#9b6ee8', now:false },
+  { club:'Brno Pacers',           city:'Brno',    day:'Today',    date:'Wed 21 May', time:'18:30', end:'19:45', place:'Lužánky, hlavní vchod',          km:7,  tags:['easy'],              color:'#7bdb6e', now:true  },
+  { club:'Ostrava Night Runners', city:'Ostrava', day:'Today',    date:'Wed 21 May', time:'20:00', end:'21:15', place:'Sady Přátelství',                km:6,  tags:['social','night'],    color:'#9b6ee8', now:false },
+  { club:'Plzeň Runners Club',    city:'Plzeň',   day:'Today',    date:'Wed 21 May', time:'20:30', end:'21:30', place:'Lochotínský park',               km:9,  tags:['social'],            color:'#e85c3a', now:false },
+  { club:'Smíchov Speed Club',    city:'Praha',   day:'Thursday', date:'Thu 22 May', time:'07:00', end:'08:00', place:'Císařský ostrov',                km:10, tags:['tempo','interval'],  color:'#e8a03a', now:false },
+  { club:'Vltava Trail Gang',     city:'Praha',   day:'Thursday', date:'Thu 22 May', time:'18:30', end:'20:00', place:'Nusle, pod mostem',              km:12, tags:['trail'],             color:'#3ab0e8', now:false },
+  { club:'Brno Pacers',           city:'Brno',    day:'Thursday', date:'Thu 22 May', time:'18:00', end:'19:30', place:'Lužánky, hlavní vchod',          km:8,  tags:['easy','social'],     color:'#7bdb6e', now:false },
+  { club:'Riegrák Night Runners', city:'Praha',   day:'Friday',   date:'Fri 23 May', time:'20:00', end:'21:15', place:'Riegrovy sady',                  km:7,  tags:['social','night'],    color:'#9b6ee8', now:false },
+  { club:'Brno Trail Runners',    city:'Brno',    day:'Friday',   date:'Fri 23 May', time:'18:30', end:'20:30', place:'Hády hill, parkoviště',          km:13, tags:['trail'],             color:'#3ab0e8', now:false },
+  { club:'Prague Running Crew',   city:'Praha',   day:'Saturday', date:'Sat 24 May', time:'09:00', end:'11:00', place:'Stromovka, hlavní vchod',        km:15, tags:['easy'],              color:'#7bdb6e', now:false },
+  { club:'Smíchov Speed Club',    city:'Praha',   day:'Saturday', date:'Sat 24 May', time:'09:00', end:'10:30', place:'Císařský ostrov',                km:14, tags:['tempo'],             color:'#e8a03a', now:false },
+  { club:'Vltava Trail Gang',     city:'Praha',   day:'Saturday', date:'Sat 24 May', time:'09:00', end:'11:30', place:'Braník, přívoz',                 km:18, tags:['trail'],             color:'#3ab0e8', now:false },
+  { club:'Brno Pacers',           city:'Brno',    day:'Saturday', date:'Sat 24 May', time:'09:00', end:'10:30', place:'Lužánky',                        km:10, tags:['easy','social'],     color:'#7bdb6e', now:false },
+  { club:'Plzeň Runners Club',    city:'Plzeň',   day:'Saturday', date:'Sat 24 May', time:'09:00', end:'10:30', place:'Bolevecký rybník',               km:11, tags:['social'],            color:'#e85c3a', now:false },
+];
+
+const TAG_LABELS_CS = { social:'Sociální', easy:'Přátelské tempo', tempo:'Tempo', interval:'Intervaly', trail:'Trail', night:'Noční běh' };
+const TAG_LABELS_EN = { social:'Social', easy:'Easy pace', tempo:'Tempo', interval:'Intervals', trail:'Trail', night:'Night run' };
+
+let activeCity = 'All';
+
+function getCities() { return [t('filter_all'), ...new Set(RUNS.map(r => r.city))]; }
+
+function renderFilters() {
+  const cities = getCities();
+  document.getElementById('filter-bar').innerHTML = cities.map(c =>
+    `<button class="filter-btn${c===activeCity||(!cities.includes(activeCity)&&c===t('filter_all'))?' active':''}" onclick="setCity('${c}')">${c}</button>`
+  ).join('');
+}
+
+function setCity(city) { activeCity = city; renderFilters(); renderSchedule(); }
+
+function renderSchedule() {
+  const out = document.getElementById('runs-output');
+  const all = t('filter_all');
+  const filtered = activeCity === all || activeCity === 'All' ? RUNS : RUNS.filter(r => r.city === activeCity);
+  const days = [...new Set(filtered.map(r => r.day))];
+  if (!days.length) { out.innerHTML = `<p style="color:var(--muted);padding:1rem 0;font-size:13px">${t('no_runs')}</p>`; return; }
+  const tagLabels = lang === 'cs' ? TAG_LABELS_CS : TAG_LABELS_EN;
+  const all2 = t('filter_all');
+  let html = '';
+  days.forEach(day => {
+    const runs = filtered.filter(r => r.day === day);
+    const dayLabel = t('days_cs')[day] || day;
+    html += `<div class="day-block"><div class="day-label">${dayLabel} — ${runs[0].date}</div>`;
+    runs.forEach(r => {
+      const tags = r.tags.map(t2 => `<span class="tag tag-${t2}">${tagLabels[t2]||t2}</span>`).join('');
+      const nowTag = r.now ? `<span class="tag tag-now">${t('running_now_tag')}</span>` : '';
+      const cityTag = (activeCity === all2 || activeCity === 'All') ? `<span class="tag tag-city">${r.city}</span>` : '';
+      html += `<div class="run-card${r.now?' now':''}">
+        <div class="stripe" style="background:${r.color}"></div>
+        <div class="card-body">
+          <div class="card-top"><span class="card-name">${r.club}</span>${nowTag}${cityTag}${tags}</div>
+          <div class="card-meta">
+            <span class="meta-i">◷ ${r.time}–${r.end}</span>
+            <span class="meta-i">◎ ${r.place}</span>
+          </div>
+        </div>
+        <div class="card-right"><div class="card-km">${r.km}</div><div class="card-km-u">km</div></div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  out.innerHTML = html;
+}
+
+function renderClubs() {
+  const cities = [...new Set(CLUBS.map(c => c.city))];
+  let html = '';
+  cities.forEach(city => {
+    html += `<div class="club-city-label">${city}</div>`;
+    CLUBS.filter(c => c.city === city).forEach((c, i) => {
+      html += `<div class="club-card" style="animation-delay:${i*.07}s">
+        <div class="club-head">
+          <div class="club-av" style="background:${c.bg};color:${c.color}">${c.abbr}</div>
+          <div><div class="club-name">${c.name}</div><div class="club-days">${c.city} · ${c.days}</div></div>
+        </div>
+        <div class="club-desc">${c.desc}</div>
+      </div>`;
+    });
+  });
+  document.getElementById('clubs-grid').innerHTML = html;
+}
+
+function renderLegend() {
+  document.getElementById('map-legend').innerHTML = CLUBS.map(c =>
+    `<div class="leg-i"><div class="leg-dot" style="background:${c.color}"></div>${c.name} (${c.city})</div>`
+  ).join('');
+}
+
+// City coordinates mapped to SVG viewBox 800x460 (roughly Czech Republic outline)
+const CITY_COORDS = {
+  'Praha':   { x: 195, y: 175 },
+  'Brno':    { x: 420, y: 290 },
+  'Ostrava': { x: 590, y: 175 },
+  'Plzeň':   { x: 95,  y: 210 },
+  'Liberec': { x: 310, y: 80  },
+  'Olomouc': { x: 500, y: 255 },
+  'České Budějovice': { x: 210, y: 340 },
+  'Hradec Králové':   { x: 370, y: 140 },
+};
+
+function renderMap() {
+  const svg = document.getElementById('map-svg');
+
+  // Czech Republic outline path (simplified, fits 800x460 viewBox)
+  const czPath = `M 148,42 L 170,38 L 205,30 L 240,28 L 275,22 L 310,18 L 345,20 L 375,15
+    L 405,18 L 435,15 L 465,22 L 495,30 L 525,28 L 555,35 L 580,42 L 605,50
+    L 625,62 L 640,78 L 648,95 L 655,112 L 660,130 L 665,148 L 668,165
+    L 665,180 L 658,195 L 648,208 L 638,220 L 625,232 L 615,245 L 610,260
+    L 615,275 L 620,290 L 618,305 L 610,318 L 598,328 L 582,335 L 565,338
+    L 545,340 L 525,345 L 505,348 L 485,352 L 462,355 L 440,358 L 418,360
+    L 395,362 L 370,360 L 345,355 L 320,350 L 295,345 L 268,342 L 242,340
+    L 218,338 L 195,332 L 172,322 L 152,310 L 135,295 L 122,278 L 112,260
+    L 105,242 L 100,222 L 95,202 L 92,182 L 90,162 L 92,142 L 98,122
+    L 108,104 L 120,88 L 133,74 L 148,62 Z`;
+
+  // Group runs by city, find "now" status
+  const cityData = {};
+  RUNS.forEach(r => {
+    if (!cityData[r.city]) cityData[r.city] = { runs: [], anyNow: false, clubs: new Set() };
+    cityData[r.city].runs.push(r);
+    cityData[r.city].clubs.add(r.club);
+    if (r.now) cityData[r.city].anyNow = true;
+  });
+
+  let html = `
+    <defs>
+      <style>
+        .map-pin { cursor: pointer; }
+        .map-pin:hover circle[r="9"] { opacity: 1; }
+        @keyframes mapPulse {
+          0%,100% { opacity: 1; r: 18; }
+          50%      { opacity: 0.3; r: 22; }
+        }
+        .pulse-ring { animation: mapPulse 1.6s ease-in-out infinite; }
+      </style>
+    </defs>
+    <!-- CZ background -->
+    <rect width="800" height="460" fill="#0b0f0c"/>
+    <!-- Grid lines -->
+    <line x1="0" y1="115" x2="800" y2="115" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+    <line x1="0" y1="230" x2="800" y2="230" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+    <line x1="0" y1="345" x2="800" y2="345" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+    <line x1="200" y1="0" x2="200" y2="460" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+    <line x1="400" y1="0" x2="400" y2="460" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+    <line x1="600" y1="0" x2="600" y2="460" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+    <!-- Country shape -->
+    <path d="${czPath}" fill="#141a12" stroke="rgba(123,219,110,0.15)" stroke-width="1.5"/>
+    <!-- Country label -->
+    <text x="360" y="420" text-anchor="middle" font-size="11" fill="rgba(107,117,102,0.5)" font-family="'DM Mono',monospace" letter-spacing="0.12em">CZECH REPUBLIC</text>
+  `;
+
+  Object.entries(cityData).forEach(([city, data]) => {
+    const coord = CITY_COORDS[city];
+    if (!coord) return;
+    const { x, y } = coord;
+    const isNow = data.anyNow;
+    const color = data.runs[0].color;
+    const clubCount = data.clubs.size;
+    const runCount = data.runs.length;
+
+    // Pulse ring for active cities
+    if (isNow) {
+      html += `<circle class="pulse-ring" cx="${x}" cy="${y}" r="18" fill="none" stroke="${color}" stroke-width="1.5" opacity="0.5"/>`;
+    }
+
+    // Outer glow circle
+    html += `<circle cx="${x}" cy="${y}" r="14" fill="${color}" opacity="0.12"/>`;
+
+    // Pin group — larger invisible hit area prevents flicker on hover
+    html += `<g class="map-pin" data-city="${city}" onmouseenter="showMapTooltip(event,'${city}')" onmouseleave="hideMapTooltip()">`;
+    html += `<circle cx="${x}" cy="${y}" r="20" fill="transparent" style="pointer-events:all"/>`;
+    html += `<circle cx="${x}" cy="${y}" r="9" fill="${color}" opacity="${isNow ? 1 : 0.75}" style="pointer-events:none"/>`;
+
+    // Count badge if multiple clubs
+    if (clubCount > 1) {
+      html += `<circle cx="${x+9}" cy="${y-9}" r="7" fill="#0b0f0c" stroke="${color}" stroke-width="1" style="pointer-events:none"/>`;
+      html += `<text x="${x+9}" y="${y-5.5}" text-anchor="middle" font-size="8" fill="${color}" font-family="'Syne',sans-serif" font-weight="700" style="pointer-events:none">${clubCount}</text>`;
+    }
+
+    html += `</g>`;
+
+    // City name label
+    html += `<text x="${x}" y="${y+22}" text-anchor="middle" font-size="10" fill="rgba(237,240,232,0.55)" font-family="'DM Mono',monospace">${city}</text>`;
+  });
+
+  svg.innerHTML = html;
+}
+
+function showMapTooltip(e, city) {
+  const data = {};
+  RUNS.filter(r => r.city === city).forEach(r => {
+    if (!data[r.club]) data[r.club] = r;
+  });
+  const runs = Object.values(data);
+  const anyNow = runs.some(r => r.now);
+
+  const tooltip = document.getElementById('map-tooltip');
+  const container = document.getElementById('map-container');
+  const rect = container.getBoundingClientRect();
+  const svgRect = document.getElementById('map-svg').getBoundingClientRect();
+  const coord = CITY_COORDS[city];
+  const scaleX = svgRect.width / 800;
+  const scaleY = svgRect.height / 460;
+
+  document.getElementById('mtt-name').textContent = city;
+  document.getElementById('mtt-meta').innerHTML = runs.map(r =>
+    `<span style="display:block">${r.club} · ${r.time}–${r.end}</span>`
+  ).join('');
+  const nowEl = document.getElementById('mtt-now');
+  nowEl.textContent = anyNow ? t('map_now_tag') : '';
+  nowEl.style.display = anyNow ? 'block' : 'none';
+
+  let tx = coord.x * scaleX + 14;
+  let ty = coord.y * scaleY - 20;
+  if (tx + 200 > svgRect.width) tx = coord.x * scaleX - 210;
+  if (ty < 0) ty = coord.y * scaleY + 20;
+
+  tooltip.style.left = tx + 'px';
+  tooltip.style.top = ty + 'px';
+  tooltip.style.display = 'block';
+}
+
+function hideMapTooltip() {
+  document.getElementById('map-tooltip').style.display = 'none';
+}
+
+function showTab(name) {
+  ['schedule','map','clubs'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===name ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', ['schedule','map','clubs'][i] === name);
+  });
+  document.getElementById('filter-bar').style.display = name === 'schedule' ? 'flex' : 'none';
+  if (name === 'map') renderMap();
+}
+
+function submitClub() {
+  const name = document.getElementById('f-name').value.trim();
+  const city = document.getElementById('f-city').value.trim();
+  const place = document.getElementById('f-place').value.trim();
+  if (!name || !city || !place) { alert(t('f_alert')); return; }
+
+  // Build a real form and submit it to Formspree
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = 'https://formspree.io/f/xaqkewoa';
+  form.target = '_blank'; // opens result in new tab, keeps user on page
+
+  const fields = {
+    '_gotcha':      '', // honeypot — bots fill this, Formspree rejects it
+    'Název klubu':  document.getElementById('f-name').value,
+    'Město':        document.getElementById('f-city').value,
+    'Místo srazu':  document.getElementById('f-place').value,
+    'Čas výběhu':   document.getElementById('f-time').value,
+    'Vzdálenost':   document.getElementById('f-km').value,
+    'Styl běhu':    document.getElementById('f-style').value,
+    'Kontakt':      document.getElementById('f-contact').value,
+    'Popis':        document.getElementById('f-desc').value,
+  };
+
+  Object.entries(fields).forEach(([k, v]) => {
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = k;
+    input.value = v;
+    form.appendChild(input);
+  });
+
+  document.body.appendChild(form);
+  form.submit();
+  document.body.removeChild(form);
+
+  // Show success on current page
+  document.getElementById('success-msg').textContent = t('f_success');
+  document.getElementById('success-msg').style.display = 'block';
+  const btn = document.querySelector('.submit-btn');
+  btn.disabled = true; btn.style.opacity = '.4';
+}
+
+function setDate() {
+  const d = new Date();
+  const days = t('date_days');
+  const months = t('date_months');
+  document.getElementById('today-label').textContent =
+    days[d.getDay()] + ', ' + d.getDate() + '. ' + months[d.getMonth()] + ' ' + d.getFullYear();
+}
+
+function initReveal() {
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }});
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+}
+
+renderClubs();
+renderLegend();
+setLang('cs');
+initReveal();
+</script>
+</body>
+</html>
